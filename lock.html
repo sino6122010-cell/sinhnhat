@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💜 Một món quà dành cho BéYêu</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{
+  min-height:100vh; overflow:hidden; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(180,90,255,.28),transparent 30%),
+    radial-gradient(circle at 20% 80%,rgba(100,40,180,.25),transparent 35%),
+    linear-gradient(145deg,#090014,#19002e 50%,#05000c);
+}
+canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+.card{
+  width:min(92%,520px); padding:34px 24px; text-align:center;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:28px;
+  background:rgba(35,10,55,.58);
+  box-shadow:0 0 45px rgba(180,70,255,.3),inset 0 0 35px rgba(255,255,255,.04);
+  backdrop-filter:blur(12px);
+  position:relative;z-index:2;
+}
+.heart{font-size:55px;filter:drop-shadow(0 0 16px #d56bff);animation:pulse 1.6s infinite}
+h1{font-size:clamp(28px,8vw,44px);margin:10px 0;color:#f2d7ff;text-shadow:0 0 18px #b94cff}
+p{line-height:1.6;color:#eadcf3}
+.countdown{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:22px 0;
+}
+.box{padding:12px 5px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
+.num{display:block;font-size:28px;font-weight:800;color:#fff}
+.label{font-size:11px;color:#cdbbd6;text-transform:uppercase}
+.status{font-weight:700;color:#e9b6ff}
+.small{font-size:12px;color:#9f8da8;margin-top:18px}
+@keyframes pulse{50%{transform:scale(1.1)}}
+@media(max-width:360px){.card{padding:28px 16px}.num{font-size:23px}}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<main class="card">
+  <div class="heart">💜</div>
+  <h1>Khoan mở nhé, BéYêu!</h1>
+  <p>
+    Hoàng Vinh có một món quà nhỏ dành riêng cho BéYêu.<br>
+    Nhưng món quà này chỉ được mở khi đúng thời điểm ✨
+  </p>
+
+  <div class="countdown">
+    <div class="box"><span class="num" id="days">00</span><span class="label">Ngày</span></div>
+    <div class="box"><span class="num" id="hours">00</span><span class="label">Giờ</span></div>
+    <div class="box"><span class="num" id="minutes">00</span><span class="label">Phút</span></div>
+    <div class="box"><span class="num" id="seconds">00</span><span class="label">Giây</span></div>
+  </div>
+
+  <div class="status" id="status">Món quà sẽ mở vào 00:00 — 24/09/2026 💌</div>
+  <div class="small">Hãy quay lại đúng thời điểm nhé... ✨</div>
+</main>
+
+<script>
+/* =========================================================
+   THỜI ĐIỂM MỞ:
+   00:00 ngày 24/09/2026 theo giờ Việt Nam (UTC+7)
+   ========================================================= */
+const unlockTime = new Date("2026-09-24T00:00:00+07:00").getTime();
+
+/* =========================================================
+   ĐỔI DÒNG NÀY THÀNH LINK TRANG SINH NHẬT CỦA BẠN
+   Ví dụ:
+   const birthdayURL = "https://tenban.github.io/sinhnhat/";
+   ========================================================= */
+const birthdayURL = "https://hoangvinh.github.io/sinhnhat/";
+
+const $ = id => document.getElementById(id);
+
+function updateCountdown(){
+  const now = Date.now();
+  const diff = unlockTime - now;
+
+  if(diff <= 0){
+    $("days").textContent="00";
+    $("hours").textContent="00";
+    $("minutes").textContent="00";
+    $("seconds").textContent="00";
+    $("status").textContent="🎉 Đã đến lúc mở món quà rồi! 💜";
+
+    if(birthdayURL.startsWith("http")){
+      setTimeout(() => {
+        window.location.href = birthdayURL;
+      }, 500);
+    }else{
+      $("status").textContent="🎉 Đã đến lúc mở! Hãy đặt link trang sinh nhật vào mã trước khi đăng QR. 💜";
+    }
+    return;
+  }
+
+  const totalSeconds = Math.floor(diff/1000);
+  const days = Math.floor(totalSeconds/86400);
+  const hours = Math.floor((totalSeconds%86400)/3600);
+  const minutes = Math.floor((totalSeconds%3600)/60);
+  const seconds = totalSeconds%60;
+
+  $("days").textContent=String(days).padStart(2,"0");
+  $("hours").textContent=String(hours).padStart(2,"0");
+  $("minutes").textContent=String(minutes).padStart(2,"0");
+  $("seconds").textContent=String(seconds).padStart(2,"0");
+}
+updateCountdown();
+setInterval(updateCountdown,1000);
+
+/* Sao lấp lánh */
+const canvas=document.getElementById("stars");
+const ctx=canvas.getContext("2d");
+let stars=[];
+
+function resize(){
+  canvas.width=innerWidth*devicePixelRatio;
+  canvas.height=innerHeight*devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  stars=Array.from({length:Math.min(130,Math.floor(innerWidth/5))},()=>({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*1.7+.3,
+    a:Math.random(),
+    s:Math.random()*.02+.005
+  }));
+}
+function draw(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  for(const s of stars){
+    s.a+=s.s;
+    const alpha=.25+.5*(Math.sin(s.a)+1)/2;
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(240,190,255,${alpha})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+addEventListener("resize",resize);
+resize();draw();
+</script>
+</body>
+</html>
